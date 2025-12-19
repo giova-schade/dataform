@@ -1,0 +1,7 @@
+config {
+    type: "view",
+    schema: "test_ds"
+}
+
+SELECT *
+from ${ref("first_model")}
