@@ -5,5 +5,5 @@ config {
 }
 
 select
-  "ci_ok" as status,
+  "ci_oknook" as status,
   current_timestamp() as ts
