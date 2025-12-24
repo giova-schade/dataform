@@ -17,11 +17,9 @@ jobs:
       contents: read
 
     steps:
-      # 1️⃣ Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Node (Dataform corre sobre Node)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
