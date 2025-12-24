@@ -2,26 +2,29 @@ name: CI - Dataform Sandbox
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
   push:
     branches:
-      - "first_branch"
+      - "feature/**"
 
 jobs:
   validate:
+    name: Validate Dataform Project
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
 
       - name: Compile Dataform
-        run: npx dataform compile
+        run: npm run compile
