@@ -1,0 +1,9 @@
+config {
+  type: "view",
+  schema: "test_ds",
+  tags: ["sandbox", "ci-test"]
+}
+
+select
+  "ci_ok" as status,
+  current_timestamp() as ts
