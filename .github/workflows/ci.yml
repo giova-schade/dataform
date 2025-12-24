@@ -1,35 +1,40 @@
-name: CD - Dataform
+name: CI - Dataform Sandbox
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      target_env:
-        description: "Environment"
-        required: true
-        type: choice
-        options: [qa, prod]
+  push:
+    branches:
+      - "feature/**"
 
 jobs:
-  deploy:
+  validate:
+    name: Validate Dataform Project
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'push' && 'dev' || inputs.target_env }}
 
     permissions:
       contents: read
-      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Auth GCP
-        uses: google-github-actions/auth@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          node-version: 18
+          cache: "npm"
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - name: Install dependencies
+        run: |
+          npm ci
 
-      # Dataform deploy steps...
+      - name: Dataform compile
+        run: |
+          npx dataform compile
+
+      - name: Dataform compile (json)
+        if: failure()
+        run: |
+          npx dataform compile --json || true
