@@ -1,29 +1,38 @@
-name: CD - Dataform Sandbox (DEV)
+name: CD - Dataform (GitHub Flow)
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
-env:
-  PROJECT_ID: dataform-480412
-  REGION: southamerica-west1
-  REPOSITORY_ID: sandbox-dataform
-  RELEASE_CONFIG: sandbox-release-dev
-  WORKFLOW_CONFIG: sandbox-workflow-dev
+    inputs:
+      target_env:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - qa
+          - prod
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    environment: ${{ github.event_name == 'push' && 'dev' || inputs.target_env }}
+
     permissions:
       contents: read
       id-token: write
 
+    env:
+      REGION: southamerica-west1
+      REPOSITORY_ID: sandbox-dataform
+
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main   # 🔑 SIEMPRE se promueve desde main
 
       - name: Auth GCP (WIF)
         uses: google-github-actions/auth@v2
@@ -34,6 +43,25 @@ jobs:
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "PROJECT_ID=dataform-480412-dev" >> $GITHUB_ENV
+            echo "RELEASE_CONFIG=sandbox-release-dev" >> $GITHUB_ENV
+            echo "WORKFLOW_CONFIG=sandbox-workflow-dev" >> $GITHUB_ENV
+            echo "DATASET=dataform_dev" >> $GITHUB_ENV
+          elif [ "${{ inputs.target_env }}" = "qa" ]; then
+            echo "PROJECT_ID=dataform-480412-qa" >> $GITHUB_ENV
+            echo "RELEASE_CONFIG=sandbox-release-qa" >> $GITHUB_ENV
+            echo "WORKFLOW_CONFIG=sandbox-workflow-qa" >> $GITHUB_ENV
+            echo "DATASET=dataform_qa" >> $GITHUB_ENV
+          else
+            echo "PROJECT_ID=dataform-480412-prod" >> $GITHUB_ENV
+            echo "RELEASE_CONFIG=sandbox-release-prod" >> $GITHUB_ENV
+            echo "WORKFLOW_CONFIG=sandbox-workflow-prod" >> $GITHUB_ENV
+            echo "DATASET=dataform_prod" >> $GITHUB_ENV
+          fi
+
       - name: Create or Update ReleaseConfig
         run: |
           gcloud beta dataform release-configs create ${RELEASE_CONFIG} \
@@ -42,14 +70,13 @@ jobs:
             --repository=${REPOSITORY_ID} \
             --git-commitish=main \
             --code-compilation-config='{
-              "defaultDatabase": "dataform-480412",
-              "defaultSchema": "test_ds",
-              "assertionSchema": "test_ds_assertions",
+              "defaultDatabase": "'"${PROJECT_ID}"'",
+              "defaultSchema": "'"${DATASET}"'",
+              "assertionSchema": "'"${DATASET}_assertions"'",
               "vars": {
-                "outputDataset": "test_ds"
+                "outputDataset": "'"${DATASET}"'"
               }
-            }' \
-          || echo "ReleaseConfig already exists"
+            }' || echo "ReleaseConfig exists"
 
       - name: Create or Update WorkflowConfig
         run: |
@@ -57,6 +84,4 @@ jobs:
             --project=${PROJECT_ID} \
             --location=${REGION} \
             --repository=${REPOSITORY_ID} \
-            --release-config=${RELEASE_CONFIG} \
-            --cron-schedule="0 0 * * *" \
-          || echo "WorkflowConfig already exists"
+            --release-config=${RELEASE_CONFIG} || echo "WorkflowConfig exists"
