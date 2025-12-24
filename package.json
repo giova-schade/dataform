@@ -1,0 +1,8 @@
+{
+  "name": "dataform-sandbox",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@dataform/core": "^3.0.39"
+  }
+}

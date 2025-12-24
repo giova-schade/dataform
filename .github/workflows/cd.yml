@@ -1,0 +1,62 @@
+name: CD - Dataform Sandbox (DEV)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: sandbox-dataform-dev
+  REGION: southamerica-west1
+  REPOSITORY_ID: sandbox-dataform
+  RELEASE_CONFIG: sandbox-release-dev
+  WORKFLOW_CONFIG: sandbox-workflow-dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth GCP (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Create or Update ReleaseConfig
+        run: |
+          gcloud beta dataform release-configs create ${RELEASE_CONFIG} \
+            --project=${PROJECT_ID} \
+            --location=${REGION} \
+            --repository=${REPOSITORY_ID} \
+            --git-commitish=main \
+            --code-compilation-config='{
+              "defaultDatabase": "sandbox-dataform-dev",
+              "defaultSchema": "test_ds",
+              "assertionSchema": "test_ds_assertions",
+              "vars": {
+                "outputDataset": "test_ds"
+              }
+            }' \
+          || echo "ReleaseConfig already exists"
+
+      - name: Create or Update WorkflowConfig
+        run: |
+          gcloud beta dataform workflow-configs create ${WORKFLOW_CONFIG} \
+            --project=${PROJECT_ID} \
+            --location=${REGION} \
+            --repository=${REPOSITORY_ID} \
+            --release-config=${RELEASE_CONFIG} \
+            --cron-schedule="0 0 * * *" \
+          || echo "WorkflowConfig already exists"

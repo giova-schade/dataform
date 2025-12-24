@@ -1,0 +1,10 @@
+{
+    "warehouse": "bigquery",
+    "defaultDatabase": "sandbox-dataform-dev",
+    "defaultSchema": "test_ds",
+    "assertionSchema": "test_ds_assertions",
+    "vars": {
+      "outputDataset": "test_ds"
+    }
+  }
+  
