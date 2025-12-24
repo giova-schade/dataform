@@ -1,6 +1,6 @@
 config {
-    type: "view",
-    schema: "test_ds"
+  type: "view",
+  schema: dataform.projectConfig.vars.outputDataset
 }
 
 SELECT *

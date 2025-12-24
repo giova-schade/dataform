@@ -1,0 +1,22 @@
+steps:
+  # 1. Instalar el CLI de Dataform
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args: ['-c', 'npm install -g @dataform/cli']
+
+  # 2. Instalar dependencias del proyecto
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args: ['-c', 'dataform install']
+
+  # 3. Compilar (CI) o Ejecutar (CD) según la rama
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if [ "$BRANCH_NAME" == "main" ]; then
+          dataform run --project=TU_PROYECTO_PROD
+        else
+          dataform compile
+        fi

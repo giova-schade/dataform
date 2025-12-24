@@ -2,3 +2,5 @@ defaultProject: dataform-480412
 defaultDataset: dataform
 defaultAssertionDataset: dataform_assertions
 dataformCoreVersion: 3.0.35
+vars:
+  outputDataset: "dataset_dev" # Valor por defecto para desarrollo
