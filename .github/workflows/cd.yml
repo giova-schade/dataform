@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: sandbox-dataform-dev
+  PROJECT_ID: dataform-480412
   REGION: southamerica-west1
   REPOSITORY_ID: sandbox-dataform
   RELEASE_CONFIG: sandbox-release-dev
@@ -42,7 +42,7 @@ jobs:
             --repository=${REPOSITORY_ID} \
             --git-commitish=main \
             --code-compilation-config='{
-              "defaultDatabase": "sandbox-dataform-dev",
+              "defaultDatabase": "dataform-480412",
               "defaultSchema": "test_ds",
               "assertionSchema": "test_ds_assertions",
               "vars": {

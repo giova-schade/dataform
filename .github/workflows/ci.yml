@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   push:
     branches:
-      - "feature/**"
+      - "first_branch"
 
 jobs:
   validate:
