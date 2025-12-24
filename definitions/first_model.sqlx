@@ -4,5 +4,6 @@ config {
 }
 
 SELECT
-  "Test" AS name,
-  "Test" AS name2
+  "OK" AS name,
+  "OK" AS name2
+
