@@ -10,7 +10,7 @@ on:
 
 jobs:
   validate:
-    name: Validate Dataform Project
+    name: CI - Dataform Sandbox 
     runs-on: ubuntu-latest
 
     permissions:
